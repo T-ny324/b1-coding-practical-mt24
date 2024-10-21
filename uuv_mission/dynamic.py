@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
 import pandas as pd
+from controller import PDController
+
 class Submarine:
     def __init__(self):
 
@@ -105,9 +107,13 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            # Call your controller here
+            # Use the controller to compute the control action based on the error (reference - actual)
+            actions[t] = self.controller.compute_control_action(mission.reference[t], observation_t)
+
+            # Apply the control action and disturbance to the plant's state transition
             self.plant.transition(actions[t], disturbances[t])
 
+        # Return a trajectory object (assuming the Trajectory class exists and handles mission and positions)
         return Trajectory(positions)
         
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:
